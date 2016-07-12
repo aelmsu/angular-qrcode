@@ -14,15 +14,15 @@ angular.module('monospaced.qrcode', [])
           'Q': 'Quartile',
           'H': 'High'
         },
-        draw = function(context, qr, modules, tile) {
+        draw = function(context, qr, modules, tile, color) {
           for (var row = 0; row < modules; row++) {
             for (var col = 0; col < modules; col++) {
-              var w = (Math.ceil((col + 1) * tile) - Math.floor(col * tile)),
-                  h = (Math.ceil((row + 1) * tile) - Math.floor(row * tile));
+              var w = tile;
+              var h = tile;
 
-              context.fillStyle = qr.isDark(row, col) ? '#000' : '#fff';
-              context.fillRect(Math.round(col * tile),
-                               Math.round(row * tile), w, h);
+              context.globalAlpha = qr.isDark(row, col) ? 1 : 0;
+              context.fillStyle = color;
+              context.fillRect(col * tile, row * tile, w, h);
             }
           }
         };
@@ -44,6 +44,7 @@ angular.module('monospaced.qrcode', [])
             errorCorrectionLevel,
             data,
             size,
+            color,
             modules,
             tile,
             qr,
@@ -78,6 +79,9 @@ angular.module('monospaced.qrcode', [])
               tile = size / modules;
               canvas.width = canvas.height = size;
             },
+            setColor = function (value) {
+              color = value;
+            },
             render = function() {
               if (!qr) {
                 return;
@@ -104,7 +108,7 @@ angular.module('monospaced.qrcode', [])
               }
 
               if (canvas2D) {
-                draw(context, qr, modules, tile);
+                draw(context, qr, modules, tile, color);
 
                 if (download) {
                   domElement.href = canvas.toDataURL('image/png');
@@ -135,6 +139,7 @@ angular.module('monospaced.qrcode', [])
         setVersion(attrs.version);
         setErrorCorrectionLevel(attrs.errorCorrectionLevel);
         setSize(attrs.size);
+        setColor(attrs.color);
 
         attrs.$observe('version', function(value) {
           if (!value) {
